@@ -2,7 +2,7 @@
 import a concrete provider directly."""
 from __future__ import annotations
 
-from typing import Protocol
+from typing import AsyncIterator, Protocol
 
 from app.config import Settings
 
@@ -10,6 +10,10 @@ from app.config import Settings
 class TtsClient(Protocol):
     async def synthesize(self, text: str) -> bytes:
         """Return raw mu-law 8kHz audio bytes for `text`, ready to reframe for Vobiz."""
+        ...
+
+    def stream(self, text: str) -> AsyncIterator[bytes]:
+        """Yield mu-law 8kHz chunks as they're generated (not frame-aligned)."""
         ...
 
 

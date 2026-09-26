@@ -7,6 +7,7 @@ from app.models import ActionType, Decision
 GREETING = "Hi, you've reached QuickKart support. I'm an AI assistant. How can I help you today?"
 OFFER_ALTERNATIVE_LINE = "I can't process another refund on this order, but I can send an exchange instead. Would that work?"
 STILL_THERE = "Are you still there?"
+COMPLAINT_ASK = "I'm sorry to hear that. Would you like a replacement or a refund?"
 CLAUDE_FAILED = "Sorry, one moment please."
 GOODBYE = "Thank you for calling QuickKart. Goodbye!"
 REFUND_ISSUED = "Your refund has been processed."

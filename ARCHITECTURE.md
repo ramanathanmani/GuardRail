@@ -985,3 +985,62 @@ When the spec is ambiguous and a sensible reading exists, pick the simplest one,
   `negation_terms` every time. Real Claude output for the required §7.5 rows now matches (verified
   live, not just the fixtures) — but this is still a probabilistic model, so watch for it recurring
   under different phrasing.
+- **2026-09-26, §5.5/§9/Phase 4 — `HELPDESK=none`.** Added a local helpdesk (`LOCAL-n` ticket ids,
+  no network) selectable with `HELPDESK=none`, for offline dev and tests only. The demo uses
+  `HELPDESK=freshdesk`. Startup still fails by variable name when the selected provider's keys
+  are missing (`get_runtime()` builds every selected provider in the lifespan).
+- **2026-09-26, §7.2/Phase 3 — Claude labels a contradictory turn `unclear`.** Live, the flipped R1
+  line came back `intent: unclear` about 1 time in 3 (with `actions_mentioned: [refund,
+  replacement]`), which skipped the gates entirely. Chose: if Claude names at least one concrete
+  action, `unclear`/`other`/`complaint` turns still go through the gates (Gate 1 then warns on the
+  lexicon-detected conflict → CONFIRM_FIRST). Only an action-free `unclear` gets the NEED_INFO
+  re-prompt. Covered by `test_unclear_intent_that_names_actions_still_goes_through_gates`.
+- **2026-09-26, §5.5/Phase 4 — ticket tags after the call.** The full tag list for later `PUT`s is
+  kept in memory per ticket (`Runtime.ticket_tags`). After a restart it falls back to
+  `["guardrail", "refund"]` + the new status tag. An extra tag, `simulated-asr-error`, marks calls
+  where fault injection fired (demo honesty).
+- **2026-09-26, §8.2/§8.3/Phase 6 — small additions.** `GET /api/demo/info` (phone number,
+  providers, profiles, live calls) for the dashboard header. `/ws/dashboard` first sends
+  `{"type":"hello","recent":[…last 50 events]}` so a page opened mid-call catches up. Extra
+  non-call events: `demo.profile`, `demo.fault_injection`, `sop.updated` (call_id null).
+  `POST /api/sim/start` with no `profile_id` uses the Next-caller picker (`auto` → Riya, since a
+  typed call has no caller number). `/api/sim/turn` returns `decision.decision_id`.
+- **2026-09-26, §8.2 — stats definitions.** Counted per call: a call is a "wrong action prevented"
+  if an executed action ≠ `first_proposed_action`, or it had OFFER_ALTERNATIVE, an SOP/risk-driven
+  (or seeded) HUMAN_HANDOFF, or an undone refund. `money_protected_inr` adds the proposed refund
+  amount for those calls when no refund went out (or the undone amount). `actions_checked` = number
+  of engine runs. Seeded rows are included and counted separately in
+  `wrong_actions_prevented_sample` / `sample_rows`.
+- **2026-09-26, §7.8 — simulated payments.** With `PAYMENTS=simulated` a refund doesn't need a
+  `payments` row (id `sim_pay_<order>`); with `PAYMENTS=dodo` no unrefunded row → `refund.failed`.
+- **2026-09-26, §5.6 — `dodo_setup` product ids.** Payment links need Dodo product ids, which only
+  exist in the Dodo dashboard. They're passed on the command line
+  (`--product ORD-66540=pdt_… --product ORD-77102=pdt_…`), not stored in `.env`.
+- **2026-09-26, §3/§8.3/Phase 6 — dashboard built here instead of the Bolt export.** No Bolt export
+  existed, and the user chose to build the dashboard directly ("the front end design we can do with
+  Claude"). `frontend/` is a small React 18 + Vite 5 app: Live demo (Next-caller picker incl.
+  Karthik + Auto, fault-injection toggle, typed-text box, live transcript, Claude's understanding,
+  5-step gate trace, undo countdown + Undo button, ticket link), SOP rules (edit → next call),
+  Audit log (filter by kind, expandable traces, "sample history" labels) and Savings (`/api/stats`).
+  Relative URLs only, `wss://` derived from `location`, no `.env`. `vite.config.js` reads
+  `BACKEND_PORT` (default 8000) so a second backend can run on another port during dev.
+- **2026-09-26, §5.1/Phase 5 — STT language after the first real calls.** Locked to the profile's
+  language (`ta-IN` for Riya), Sarvam turned English speech into Tamil-script noise ("ஐ அகோட
+  அனதி"). Chose: `SARVAM_STT_LANGUAGE=auto` (the SDK's adaptive detection) and
+  `SARVAM_STT_MODE=translit` (Latin script, which the Latin lexicon forms in §7.4 match), plus a
+  short `prompt` of the demo's key words. `SARVAM_STT_LANGUAGE=profile` restores the original
+  behaviour if auto misdetects on stage.
+- **2026-09-26, §6.3 — finals during THINKING are queued, not dropped.** The first real call lost two
+  sentences said while Claude was thinking. Finals are still dropped while the agent is *speaking*
+  (echo guard); finals during THINKING are queued and become the next turn.
+- **2026-09-26, §7.2 — complaint with no action named.** "I ordered a camera and it came broken"
+  went straight to HUMAN_HANDOFF, which felt abrupt live. Chose: a `complaint` with an order on file
+  and no action named first gets "I'm sorry to hear that. Would you like a replacement or a
+  refund?" (template, not Claude text), and the next turn is a fresh turn through the gates. A
+  second complaint in a row, or `other`, hands off as before. No §7.5 row is affected.
+- **2026-09-26, §5.2/§8.3 — streamed replies + two additive event fields.** Uncached replies now
+  stream from ElevenLabs straight into 160-byte `playAudio` frames (about 100 ms ahead of real
+  time) instead of waiting for the whole clip, so the caller hears the agent sooner. The echo guard
+  still covers the whole reply until its `playedStream`. Added `agent.audio {speaking: bool}`
+  (phone calls only, drives the dashboard's "Agent speaking" indicator) and `tags` on
+  `ticket.created`. Both are additive; no existing event changed shape.

@@ -25,7 +25,10 @@ class Settings(BaseSettings):
     # Sarvam (STT, and stretch TTS fallback)
     SARVAM_API_KEY: str | None = None
     SARVAM_STT_MODEL: str = "saaras:v3-realtime"
-    SARVAM_STT_MODE: str = "codemix"
+    SARVAM_STT_MODE: str = "translit"
+    # "auto" = Sarvam's adaptive language detection (English stays English); "profile" = lock to
+    # the bound profile's language_code (the original §5.1 behaviour).
+    SARVAM_STT_LANGUAGE: str = "auto"
     SARVAM_TTS_MODEL: str = "bulbul:v3"
     SARVAM_TTS_SPEAKER: str | None = None
 

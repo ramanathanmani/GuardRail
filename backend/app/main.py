@@ -5,7 +5,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.agent.runtime import get_runtime
 from app.api import dashboard as dashboard_api
+from app.api import public as public_api
 from app.api import sim as sim_api
 from app.config import Settings, get_settings
 from app.store.db import get_session, init_db
@@ -36,8 +38,13 @@ async def _prerender_greeting(settings: Settings) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    settings = get_settings()
     await asyncio.to_thread(_init_and_seed)
-    await _prerender_greeting(get_settings())
+    runtime = get_runtime()  # builds every selected provider; a missing key fails here, by name
+    logger.info("providers: helpdesk=%s payments=%s audit=%s", settings.HELPDESK, settings.PAYMENTS, settings.AUDIT_ARCHIVE)
+    await runtime.undo.recover_on_startup()
+    await _prerender_greeting(settings)
+    runtime.spawn(vobiz_routes.prerender_fixed_lines())
     yield
 
 
@@ -45,6 +52,7 @@ app = FastAPI(title="GuardRail", lifespan=lifespan)
 app.include_router(vobiz_routes.router)
 app.include_router(sim_api.router)
 app.include_router(dashboard_api.router)
+app.include_router(public_api.router)
 
 settings = get_settings()
 if settings.APP_ENV == "dev":

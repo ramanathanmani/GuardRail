@@ -13,6 +13,13 @@ from app.config import Settings
 
 logger = logging.getLogger("guardrail.sarvam")
 
+# Biases decoding toward the words the gates care about (applied to final transcripts).
+STT_PROMPT = (
+    "Customer support call, code-mixed Tamil/Hindi/Kannada and English. Words: refund, replacement, "
+    "exchange, cancel, address, order, vendam, venum, venda, beku, beda, chahiye, nahi, mat, karo, "
+    "anuppunga, aama, haan, illa, howdu."
+)
+
 TranscriptHandler = Callable[[str, str], Awaitable[None]]  # (event, text) -> None
 
 
@@ -26,6 +33,8 @@ class SarvamStream:
     ) -> None:
         settings.require_stt()
         self._client = AsyncSarvamAI(api_subscription_key=settings.SARVAM_API_KEY)
+        self._model = settings.SARVAM_STT_MODEL
+        self._mode = settings.SARVAM_STT_MODE
         self._call_id = call_id
         self._language_code = language_code
         self._on_transcript = on_transcript
@@ -36,8 +45,9 @@ class SarvamStream:
     async def open(self) -> None:
         self._ctx = self._client.speech_to_text_realtime_streaming.connect(
             language_code=self._language_code,
-            model="saaras:v3-realtime",
-            mode="codemix",
+            model=self._model,
+            mode=self._mode,
+            prompt=STT_PROMPT,
             endpointing="vad",
             stream_type="fast",
             encoding="mulaw",

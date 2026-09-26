@@ -27,6 +27,25 @@ _RISK_TO_STATUS = {
 }
 
 
+def _risk_step(ctx: GateContext, risk: RiskLevel, amount: float) -> GateStep:
+    """Explains *why* the risk level was reached, and what it means for this action."""
+    reasons = []
+    if ctx.refunds_in_window > ctx.sop.max_refunds or ctx.refunds_in_window >= 2:
+        reasons.append(f"{ctx.refunds_in_window} refunds in {ctx.sop.refund_window_days} days")
+    if ctx.customer.account_age_days < 7 and amount > ctx.sop.high_value_hold_inr:
+        reasons.append(f"account {ctx.customer.account_age_days} days old")
+    if amount > 2 * ctx.customer.avg_order_inr:
+        reasons.append(f"₹{amount:.0f} > 2× the usual order")
+    why = f" ({', '.join(reasons)})" if reasons and risk != RiskLevel.low else ""
+    if risk == RiskLevel.high:
+        if amount > 0:
+            return GateStep(step=4, gate="risk", status=GateStatus.FAIL,
+                            detail=f"risk: high{why} — cash is blocked")
+        return GateStep(step=4, gate="risk", status=GateStatus.WARN,
+                        detail=f"risk: high{why} — no cash moves, so the action can proceed")
+    return GateStep(step=4, gate="risk", status=_RISK_TO_STATUS[risk], detail=f"risk: {risk.value}{why}")
+
+
 def _understanding_step(ctx: GateContext) -> GateStep:
     return GateStep(
         step=1, gate="understanding", status=GateStatus.PASS,
@@ -57,7 +76,7 @@ def run_gates(ctx: GateContext) -> EngineResult:
         steps.append(GateStep(step=4, gate="risk", status=GateStatus.SKIPPED, detail="not reached — rule 1 already decided"))
         decision = Decision(
             kind=DecisionKind.CONFIRM_FIRST, action_type=ctx.proposed_action.type,
-            amount_inr=ctx.proposed_action.cash_amount_inr, reason="negation gate warned — needs confirmation",
+            amount_inr=ctx.proposed_action.cash_amount_inr, reason="possible negation error — confirm with the customer before acting",
             candidate_actions=candidates, negated_action=negated_action,
         )
         steps.append(GateStep(step=5, gate="decision", status=GateStatus.PASS, detail=f"CONFIRM_FIRST: {decision.reason}"))
@@ -104,9 +123,8 @@ def run_gates(ctx: GateContext) -> EngineResult:
 
     # Gate 3 — risk. Only reached once SOP has passed.
     risk = assess_risk(ctx)
-    steps.append(GateStep(step=4, gate="risk", status=_RISK_TO_STATUS[risk], detail=f"risk: {risk.value}"))
-
     amount = ctx.proposed_action.cash_amount_inr
+    steps.append(_risk_step(ctx, risk, amount))
 
     # Rule 5: never move cash at high risk.
     if risk == RiskLevel.high and amount > 0:
@@ -121,7 +139,8 @@ def run_gates(ctx: GateContext) -> EngineResult:
     if amount > ctx.sop.high_value_hold_inr:
         decision = Decision(
             kind=DecisionKind.EXECUTE_WITH_HOLD, action_type=ctx.proposed_action.type,
-            amount_inr=amount, reason="cash amount exceeds the high-value hold",
+            amount_inr=amount,
+            reason=f"₹{amount:.0f} is above the ₹{ctx.sop.high_value_hold_inr:.0f} hold — refund waits in an undo window",
         )
         steps.append(GateStep(step=5, gate="decision", status=GateStatus.PASS, detail=f"EXECUTE_WITH_HOLD: {decision.reason}"))
         return EngineResult(trace=GateTrace(steps=steps), decision=decision)

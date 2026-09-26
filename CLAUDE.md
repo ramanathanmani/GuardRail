@@ -98,17 +98,21 @@ and 4 don't need the phone; Phase 5 does). Never mark it passed on their behalf.
 export) before Phase 6. If `frontend/` is empty when you get there, ask the user for it. Don't
 scaffold a new UI.
 
-Current phase: **4** (update this line as phases complete). Phase 0 passed its done-when check.
-Phase 2 passed its done-when check (real call: greeting played, transcripts logged). Phase 1's
-engine/intents/fixtures/tests are built and green as a side effect of Phase 3 (`/v1/check` itself
-was never built — not needed for anything done so far; add it if something starts depending on
-it). Phase 3 passed its done-when check: typed R1→R2, A1→A2, M1, K1→K2 all gave the exact §7.5
-results against the **real** Claude API (not fixtures) — see ARCHITECTURE.md §15 for two real
-Claude misfires found and fixed along the way (an unscoped API key, and Claude misreading the
-Tamil verb "anuppunga" as a negation). Ticket ids in EXECUTE/HANDOFF templates are a local
-placeholder (`TCK-...`) until Phase 4 wires real Freshdesk tickets in. The undo-window timer and
-Dodo refund call are still stubs (Phase 7) — EXECUTE_WITH_HOLD and refund EXECUTE just report the
-decision and speak the window-open line.
+Current phase: **6 code complete — awaiting user check** (dashboard built in `frontend/`, see §15) (update this line as phases
+complete). Phases 0, 2 and 3 passed their done-when checks (see ARCHITECTURE.md §15). Phase 1 is
+complete: `/v1/check` is now built (`app/api/public.py`).
+**Code complete, awaiting user check** (51 tests green; typed smoke test against real Claude OK):
+- Phase 4 (Freshdesk): needs `FRESHDESK_DOMAIN` + `FRESHDESK_API_KEY` in `.env`, then one typed call
+  → exactly one ticket. Verified so far only with `HELPDESK=none` + mocked Freshdesk tests.
+- Phase 5 (full phone loop, echo guard, silence, goodbye + hang-up): needs a real call as Riya.
+- Phase 7 (undo window, Dodo refunds, restart safety, fault toggle): needs `DODO_PAYMENTS_API_KEY`,
+  Dodo products and paid links (`dodo_setup`), then Meera's refund showing in the Dodo dashboard.
+  Verified with `PAYMENTS=simulated` + mocked Dodo tests.
+- Phase 8 (S3 archive + EC2): archive code done and verified with `AUDIT_ARCHIVE=local`; needs
+  `S3_AUDIT_BUCKET` + the EC2 deploy (the user runs it).
+Phase 4 passed: a typed call created exactly one real Freshdesk ticket (#4, then #5/#6 via the dashboard).
+Phase 6: dashboard verified in the browser (Riya R1→R2 live trace + ticket link, Meera hold + Undo,
+Savings/Audit render). Needs the user's own look on the SOP edit → Arjun A4 flow.
 
 ---
 
@@ -132,8 +136,9 @@ decision and speak the window-open line.
 
 **Conversation**
 - **Spoken lines come from `agent/templates.py`, chosen *after* the decision.** Claude's
-  `reply_to_customer` is spoken only for NEED_INFO and `order_status`. `complaint` and `other`
-  get the HUMAN_HANDOFF template and a ticket (§7.2).
+  `reply_to_customer` is spoken only for NEED_INFO and `order_status`. A `complaint` with no
+  action named is asked once "replacement or refund?" (template), then HUMAN_HANDOFF; `other` gets
+  HUMAN_HANDOFF and a ticket (§7.2, §15).
 - CONFIRM_FIRST questions are built from the pending candidate actions (choice form vs read-back
   form, §6.2), never from Claude's free text. Answers go through `agent/answers.py` first. An
   answer that names an action confirms *that* action. A confirmed turn skips Gate 1. A second

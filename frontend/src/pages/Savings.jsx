@@ -26,7 +26,7 @@ export default function Savings() {
         {kinds.map(([k, n]) => (
           <div key={k} className="row" style={{ marginBottom: 8 }}>
             <div style={{ width: 170 }}>{k.replace(/_/g, ' ')}</div>
-            <div style={{ flex: 1 }}><div className="bar" style={{ width: `${(n / max) * 100}%` }} /></div>
+            <div className="track" style={{ flex: 1 }}><div className="bar" style={{ width: `${(n / max) * 100}%` }} /></div>
             <b>{n}</b>
           </div>
         ))}
@@ -36,7 +36,7 @@ export default function Savings() {
         {Object.entries(s.negation_catches_by_language).map(([k, n]) => (
           <div key={k} className="row" style={{ marginBottom: 8 }}>
             <div style={{ width: 170 }}>{LANGS[k]}</div>
-            <div style={{ flex: 1 }}><div className="bar" style={{ width: `${(n / maxLang) * 100}%`, background: 'var(--warn)' }} /></div>
+            <div className="track" style={{ flex: 1 }}><div className="bar" style={{ width: `${(n / maxLang) * 100}%`, background: 'var(--warn)' }} /></div>
             <b>{n}</b>
           </div>
         ))}

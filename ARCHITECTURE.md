@@ -1044,3 +1044,13 @@ When the spec is ambiguous and a sensible reading exists, pick the simplest one,
   still covers the whole reply until its `playedStream`. Added `agent.audio {speaking: bool}`
   (phone calls only, drives the dashboard's "Agent speaking" indicator) and `tags` on
   `ticket.created`. Both are additive; no existing event changed shape.
+- **2026-09-26, Phase 6 — dashboard restyled as a Freshworks (Freshdesk) app.** The user overrode
+  "don't redesign the frontend's look" for this change. Light theme using values taken from
+  `@freshworks/crayons@4.2.0` (palette, system font stack, `fw-card-2` card, label/pill, button,
+  input, toggle and data-table styles), restated as CSS variables in `frontend/src/styles.css`.
+  Layout: dark left nav rail (Live demo, SOP rules, Audit log, Savings) + white header ("GuardRail
+  for Freshdesk / Built for Freshworks", status chips as labels). Crayons web components were not
+  added (React 18 custom-event friction, large dependency); plain elements use the same values.
+  No Freshworks logo, and no wording that implies an official Freshworks product. Only visuals
+  changed: `api.js`, `useLive.js`, event names, `/api/*` calls and the honesty labels are untouched.
+  Ticket ids with a URL show Freshdesk-style (`#6 ↗`); `LOCAL-n` ids keep the plain "Ticket …" text.

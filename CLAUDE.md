@@ -275,7 +275,7 @@ steps.
 
 ## Don'ts
 - No new services, queues or databases (no Redis, Celery or Docker unless asked).
-- Don't redesign the Bolt frontend's look. Rewire its data to `/ws/dashboard` + `/api/*`, turn
+- Don't redesign the frontend's look (now a Freshdesk-style light theme built on Crayons values, §15). Rewire its data to `/ws/dashboard` + `/api/*`, turn
   the scenario cards into the Next-caller picker (plus Karthik), and add the typed-text box.
 - Build stretch items (browser mic, Freshservice, Bedrock, Sarvam TTS, barge-in) only when the
   user says to.

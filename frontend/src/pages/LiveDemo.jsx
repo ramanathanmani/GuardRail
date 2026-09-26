@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { api } from '../api.js'
 import GateTrace from '../components/GateTrace.jsx'
 import Undo from '../components/Undo.jsx'
+import { TicketIcon } from '../components/Icons.jsx'
 
 const LANG = { 'ta-IN': 'Tamil', 'hi-IN': 'Hindi', 'kn-IN': 'Kannada' }
 const CITY = { riya: 'Coimbatore', arjun: 'Delhi', meera: 'Bangalore', karthik: 'Chennai' }
@@ -112,7 +113,7 @@ export default function LiveDemo({ live, info, profile, fault }) {
               <h3>Call</h3>
               <div className="row" style={{ flexWrap: 'wrap' }}>
                 <b>{current.profile}</b>
-                <span className="pill">{current.channel === 'phone' ? '📞 phone' : '⌨ typed'}</span>
+                <span className="lbl grey">{current.channel === 'phone' ? '📞 phone' : '⌨ typed'}</span>
                 <Status call={current} />
                 {current.fault && <span className="badge sim">SIMULATED ASR ERROR</span>}
                 <div className="spacer" />
@@ -123,7 +124,7 @@ export default function LiveDemo({ live, info, profile, fault }) {
                 )}
               </div>
               {current.fault && (
-                <p className="muted">Heard: “<b>{current.fault.original}</b>”<br />ASR error simulated as: “<b>{current.fault.flipped}</b>”</p>
+                <p className="heard">Heard: “<b>{current.fault.original}</b>”<br />ASR error simulated as: “<b>{current.fault.flipped}</b>”</p>
               )}
               <div className="chat" style={{ marginTop: 12 }}>
                 {current.transcript.map((m, i) => <div key={i} className={'bubble ' + m.who}>{m.text}</div>)}
@@ -176,7 +177,7 @@ export default function LiveDemo({ live, info, profile, fault }) {
                 <h3>Ticket</h3>
                 <div className="row" style={{ flexWrap: 'wrap' }}>
                   {current.ticket.url
-                    ? <a href={current.ticket.url} target="_blank" rel="noreferrer">Freshdesk ticket #{current.ticket.id} ↗</a>
+                    ? <><span className="muted">Freshdesk ticket</span><a className="ticket-id" href={current.ticket.url} target="_blank" rel="noreferrer"><TicketIcon />#{current.ticket.id} ↗</a></>
                     : <b>Ticket {current.ticket.id}</b>}
                   <div className="tags">{(current.ticket.tags || []).map((t) => <span key={t} className="tag">{t}</span>)}</div>
                 </div>

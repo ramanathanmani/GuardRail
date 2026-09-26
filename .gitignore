@@ -1,0 +1,18 @@
+# secrets
+backend/.env
+.env
+*.env.local
+.mcp.json
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+backend/guardrail.db
+backend/audit/
+deploy/caddy.env
+
+# node
+frontend/node_modules/
+frontend/dist/

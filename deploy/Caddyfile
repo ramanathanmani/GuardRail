@@ -1,0 +1,30 @@
+{$SITE_ADDRESS}
+
+encode gzip
+
+# 1. Vobiz and the public API — no basic auth, Vobiz and API clients must reach these.
+@noauth path /vobiz/* /v1/* /health
+handle @noauth {
+	reverse_proxy 127.0.0.1:8000
+}
+
+# 2. Dashboard REST + the live event socket — basic auth.
+# If /ws won't connect through basic auth on EC2 (§5.7), move this block's paths into @noauth
+# instead — the event stream is read-only.
+@authed path /api/* /ws/*
+handle @authed {
+	basic_auth {
+		{$DASHBOARD_USER} {$DASHBOARD_PASSWORD_HASH}
+	}
+	reverse_proxy 127.0.0.1:8000
+}
+
+# 3. Everything else — the dashboard frontend, basic auth.
+handle {
+	basic_auth {
+		{$DASHBOARD_USER} {$DASHBOARD_PASSWORD_HASH}
+	}
+	root * /opt/guardrail/frontend/dist
+	try_files {path} /index.html
+	file_server
+}

@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+sqlmodel
+httpx
+pydantic-settings
+python-multipart
+anthropic
+sarvamai
+elevenlabs
+dodopayments
+boto3
+audioop-lts; python_version >= "3.13"
+pytest
+pytest-asyncio

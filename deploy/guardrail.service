@@ -1,0 +1,17 @@
+[Unit]
+Description=GuardRail backend (uvicorn)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/opt/guardrail/backend
+ExecStart=/opt/guardrail/backend/.venv/bin/uvicorn app.main:app --workers 1 --no-access-log --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=2
+# backend/.env is read directly by app/config.py (pydantic-settings); it does not need to be
+# listed here as long as WorkingDirectory is backend/.
+
+[Install]
+WantedBy=multi-user.target

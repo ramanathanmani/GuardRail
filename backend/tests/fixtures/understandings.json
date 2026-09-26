@@ -1,0 +1,86 @@
+{
+  "R1": {
+    "english_translation": "The jar is broken. I want a refund, send a replacement.",
+    "languages_detected": ["ta", "en"],
+    "intent": "refund",
+    "actions_mentioned": ["refund", "replacement"],
+    "entities": {"order_id": null, "product": "mixer grinder", "issue": "jar broken"},
+    "negation_analysis": {
+      "negation_terms": [],
+      "contradiction": false,
+      "contradiction_detail": "",
+      "intent_confidence": 0.85
+    },
+    "reply_to_customer": ""
+  },
+  "R3": {
+    "english_translation": "The jar is broken. I don't want a refund, send a replacement.",
+    "languages_detected": ["ta", "en"],
+    "intent": "refund",
+    "actions_mentioned": ["refund", "replacement"],
+    "entities": {"order_id": null, "product": "mixer grinder", "issue": "jar broken"},
+    "negation_analysis": {
+      "negation_terms": [{"term": "vendam", "language": "ta", "meaning": "don't want", "governs": "refund"}],
+      "contradiction": false,
+      "contradiction_detail": "",
+      "intent_confidence": 0.8
+    },
+    "reply_to_customer": ""
+  },
+  "A1": {
+    "english_translation": "I want a refund, the size is wrong.",
+    "languages_detected": ["hi", "en"],
+    "intent": "refund",
+    "actions_mentioned": ["refund"],
+    "entities": {"order_id": null, "product": "T-shirt", "issue": "wrong size"},
+    "negation_analysis": {
+      "negation_terms": [],
+      "contradiction": false,
+      "contradiction_detail": "",
+      "intent_confidence": 0.9
+    },
+    "reply_to_customer": ""
+  },
+  "M1": {
+    "english_translation": "The sole has come off, I want a refund.",
+    "languages_detected": ["kn", "en"],
+    "intent": "refund",
+    "actions_mentioned": ["refund"],
+    "entities": {"order_id": null, "product": "sneakers", "issue": "sole worn out"},
+    "negation_analysis": {
+      "negation_terms": [],
+      "contradiction": false,
+      "contradiction_detail": "",
+      "intent_confidence": 0.9
+    },
+    "reply_to_customer": ""
+  },
+  "K1": {
+    "english_translation": "Don't cancel the order, just change the address.",
+    "languages_detected": ["hi", "en"],
+    "intent": "cancel_order",
+    "actions_mentioned": ["cancel_order", "address_change"],
+    "entities": {"order_id": null, "product": "headphones", "issue": null},
+    "negation_analysis": {
+      "negation_terms": [{"term": "mat", "language": "hi", "meaning": "don't", "governs": "cancel_order"}],
+      "contradiction": false,
+      "contradiction_detail": "",
+      "intent_confidence": 0.8
+    },
+    "reply_to_customer": ""
+  },
+  "X1": {
+    "english_translation": "I want a refund for my order.",
+    "languages_detected": ["en"],
+    "intent": "refund",
+    "actions_mentioned": ["refund"],
+    "entities": {"order_id": "ORD-SYNTH", "product": "gadget", "issue": null},
+    "negation_analysis": {
+      "negation_terms": [],
+      "contradiction": false,
+      "contradiction_detail": "",
+      "intent_confidence": 0.95
+    },
+    "reply_to_customer": ""
+  }
+}
